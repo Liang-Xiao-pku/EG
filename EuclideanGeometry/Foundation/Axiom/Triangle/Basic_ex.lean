@@ -4,63 +4,7 @@ noncomputable section
 namespace EuclidGeom
 
 variable {P : Type _} [EuclideanPlane P] (tr : Triangle P) (tr_nd : TriangleND P)
-
-namespace Triangle
-
-def perm_vertices : (Triangle P) where
-  point₁ := tr.point₂
-  point₂ := tr.point₃
-  point₃ := tr.point₁
-
--- We decide not to define reverse permutation of triangles, just do composition twice.
-
--- Permuting three times returns to the original triangle.
-theorem eq_self_of_perm_vertices_three_times : tr.perm_vertices.perm_vertices.perm_vertices = tr := rfl
-
--- flip vertices for triangles means to flip the second and the third vertices.
-
-def flip_vertices : (Triangle P) where
-  point₁ := tr.point₁
-  point₂ := tr.point₃
-  point₃ := tr.point₂
-
-theorem eq_self_of_flip_vertices_twice : tr.flip_vertices.flip_vertices = tr := rfl
-
--- Not sure this is the best theorem to p
-theorem eq_flip_of_perm_twice_of_perm_flip_vertices : tr.flip_vertices.perm_vertices.perm_vertices = tr.perm_vertices.flip_vertices := rfl
-
-theorem is_inside_of_is_inside_perm_vertices (tr : Triangle P) (p : P) (inside : p LiesInt tr) : p LiesInt tr.perm_vertices := by
-  sorry
-
-theorem is_inside_of_is_inside_flip_vertices (tr : Triangle P) (p : P) (inside : p LiesInt tr) : p LiesInt tr.flip_vertices := by
-  sorry
-
-end Triangle
-
-namespace TriangleND
-
-def perm_vertices : (TriangleND P) := ⟨tr_nd.1.perm_vertices, flip_colinear_snd_trd.mt $ flip_colinear_fst_snd.mt tr_nd.2⟩
-
-def flip_vertices : (TriangleND P) := ⟨tr_nd.1.flip_vertices, flip_colinear_snd_trd.mt tr_nd.2⟩
-
-theorem eq_self_of_perm_vertices_three_times : tr_nd.perm_vertices.perm_vertices.perm_vertices = tr_nd := rfl
-  --exact tr_nd.1.eq_self_of_perm_vertices_three_times
-
-theorem eq_self_of_flip_vertices_twice : tr_nd.flip_vertices.flip_vertices = tr_nd := rfl
-
-theorem eq_flip_of_perm_twice_of_perm_flip_vertices : tr_nd.flip_vertices.perm_vertices.perm_vertices = tr_nd.perm_vertices.flip_vertices := rfl
-
--- compatibility of permutation/flip of vertices with orientation of the triangle
-
-theorem same_orient_of_perm_vertices : tr_nd.is_cclock = (tr_nd.perm_vertices.is_cclock) := by sorry
-
-theorem reverse_orient_of_flip_vertices : tr_nd.is_cclock = ¬ tr_nd.flip_vertices.is_cclock := by sorry
-
-theorem is_inside_of_is_inside_perm_vertices (tr_nd : Triangle P) (p : P) (inside : p LiesInt tr_nd) : p LiesInt tr_nd.perm_vertices := by sorry
-
-theorem is_inside_of_is_inside_flip_vertices (tr_nd : Triangle P) (p : P) (inside : p LiesInt tr_nd) : p LiesInt tr_nd.flip_vertices := by sorry
-
-end TriangleND
+--perm and flip is moved to the main file
 
 
 /-
@@ -168,8 +112,7 @@ theorem iscclock_iff_liesonleft₃ (tr_nd : TriangleND P) : tr_nd.is_cclock = tr
       apply oarea_eq_length_mul_odist_div_two
     unfold oarea
     unfold Triangle.oarea
-    have pos : tr_nd.edge_nd₃.length > 0 := by
-      apply EuclidGeom.length_pos
+    have _ : tr_nd.edge_nd₃.length > 0 := tr_nd.edge_nd₃.length_pos
     simp only [this, eq_iff_iff]
     symm
     constructor
@@ -193,20 +136,20 @@ theorem iscclock_iff_liesonleft₂ (tr_nd : TriangleND P) : tr_nd.is_cclock = tr
   simp only [h]
   apply iscclock_iff_liesonleft₁
 
-theorem eq_cclock_of_IsOnSameSide (A B C D : P) [hne : PtNe B A] (h : IsOnSameSide C D (RAY A B)) : (TRI_nd A B C (not_colinear_of_IsOnSameSide A B C D h).1).is_cclock = (TRI_nd A B D (not_colinear_of_IsOnSameSide A B C D h).2).is_cclock := by
-  have c : (TRI_nd A B C (not_colinear_of_IsOnSameSide A B C D h).1).is_cclock = C LiesOnLeft (SEG_nd A B) := by
+theorem eq_cclock_of_IsOnSameSide (A B C D : P) [hne : PtNe B A] (h : IsOnSameSide C D (RAY A B)) : (TRI_nd A B C (not_collinear_of_IsOnSameSide A B C D h).1).is_cclock = (TRI_nd A B D (not_collinear_of_IsOnSameSide A B C D h).2).is_cclock := by
+  have c : (TRI_nd A B C (not_collinear_of_IsOnSameSide A B C D h).1).is_cclock = C LiesOnLeft (SEG_nd A B) := by
     apply iscclock_iff_liesonleft₃
-  have d : (TRI_nd A B D (not_colinear_of_IsOnSameSide A B C D h).2).is_cclock = D LiesOnLeft (SEG_nd A B) := by
+  have d : (TRI_nd A B D (not_collinear_of_IsOnSameSide A B C D h).2).is_cclock = D LiesOnLeft (SEG_nd A B) := by
     apply iscclock_iff_liesonleft₃
   have h0 : C LiesOnLeft (SEG_nd A B) = D LiesOnLeft (SEG_nd A B) := by
     apply LiesOnLeft_iff_LiesOnLeft_of_IsOnSameSide
     exact h
   simp only [c, h0, d]
 
-theorem anti_cclock_of_IsOnOppositeSide (A B C D : P) [hne : PtNe B A] (h : IsOnOppositeSide C D (SEG_nd A B)) : (TRI_nd A B C (not_colinear_of_IsOnOppositeSide A B C D h).1).is_cclock → ¬ (TRI_nd A B D (not_colinear_of_IsOnOppositeSide A B C D h).2).is_cclock := by
-  have c : (TRI_nd A B C (not_colinear_of_IsOnOppositeSide A B C D h).1).is_cclock = C LiesOnLeft (SEG_nd A B) := by
+theorem anti_cclock_of_IsOnOppositeSide (A B C D : P) [hne : PtNe B A] (h : IsOnOppositeSide C D (SEG_nd A B)) : (TRI_nd A B C (not_collinear_of_IsOnOppositeSide A B C D h).1).is_cclock → ¬ (TRI_nd A B D (not_collinear_of_IsOnOppositeSide A B C D h).2).is_cclock := by
+  have c : (TRI_nd A B C (not_collinear_of_IsOnOppositeSide A B C D h).1).is_cclock = C LiesOnLeft (SEG_nd A B) := by
     apply iscclock_iff_liesonleft₃
-  have d : (TRI_nd A B D (not_colinear_of_IsOnOppositeSide A B C D h).2).is_cclock = D LiesOnLeft (SEG_nd A B) := by
+  have d : (TRI_nd A B D (not_collinear_of_IsOnOppositeSide A B C D h).2).is_cclock = D LiesOnLeft (SEG_nd A B) := by
     apply iscclock_iff_liesonleft₃
   simp only [c,d]
   have h0 : C LiesOnLeft SEG_nd A B = D LiesOnLeft (SEG_nd A B).reverse := by
@@ -227,7 +170,63 @@ theorem anti_cclock_of_IsOnOppositeSide (A B C D : P) [hne : PtNe B A] (h : IsOn
   rw [this] at P
   linarith
 
+--LiesOnLeft or LiesOnRight straight to Angle.sign hiding cclock
 
+lemma liesonleft_ne_pts {A B C : P} [hne : PtNe B A] (h : C LiesOnLeft (DLIN A B)) : (C ≠ A) ∧ (C ≠ B) := by
+  have h': C LiesOnLeft (RAY A B) := by exact h
+  have : ¬ collinear A B C := by
+    apply not_collinear_of_LiesOnLeft_or_LiesOnRight
+    simp only [h', true_or]
+  have c_ne_a : C ≠ A := (ne_of_not_collinear this).2.1.symm
+  have c_ne_b : C ≠ B := (ne_of_not_collinear this).1
+  simp only [ne_eq, c_ne_a, not_false_eq_true, c_ne_b, and_self]
+
+theorem liesonleft_angle_ispos {A B C : P} [hne : PtNe B A] (h : C LiesOnLeft (DLIN A B)) : (∠ A C B (liesonleft_ne_pts h).1.symm (liesonleft_ne_pts h).2.symm).IsPos := by
+  have h': C LiesOnLeft (RAY A B) := by exact h
+  have ABC_nd: ¬ collinear A B C := by
+    apply not_collinear_of_LiesOnLeft_or_LiesOnRight
+    simp only [h', true_or]
+  have c : (TRI_nd A B C ABC_nd).is_cclock = C LiesOnLeft (SEG_nd A B) := by
+    apply iscclock_iff_liesonleft₃
+  have h': (TRI_nd A B C ABC_nd).is_cclock := by
+    simp only [c]
+    exact h
+  have : (TRI_nd A B C ABC_nd).angle₃.value.IsPos = (TRI_nd A B C ABC_nd).is_cclock := by
+    symm
+    simp only [eq_iff_iff]
+    exact angle₃_pos_iff_cclock (TRI_nd A B C ABC_nd)
+  simp only [← this] at h'
+  exact h'
+
+lemma liesonright_ne_pts {A B C : P} [hne : PtNe B A] (h : C LiesOnRight (DLIN A B)) : (C ≠ A) ∧ (C ≠ B) := by
+  have h': C LiesOnRight (RAY A B) := by exact h
+  have : ¬ collinear A B C := by
+    apply not_collinear_of_LiesOnLeft_or_LiesOnRight
+    simp only [h', or_true]
+  have c_ne_a : C ≠ A := (ne_of_not_collinear this).2.1.symm
+  have c_ne_b : C ≠ B := (ne_of_not_collinear this).1
+  simp only [ne_eq, c_ne_a, not_false_eq_true, c_ne_b, and_self]
+
+theorem liesonright_angle_isneg {A B C : P} [hne : PtNe B A] (h : C LiesOnRight (DLIN A B)) : (∠ A C B (liesonright_ne_pts h).1.symm (liesonright_ne_pts h).2.symm).IsNeg := by
+  have h': C LiesOnRight (RAY A B) := by exact h
+  have h'' : C LiesOnRight (SEG_nd A B) := by exact h
+  have ABC_nd: ¬ collinear A B C := by
+    apply not_collinear_of_LiesOnLeft_or_LiesOnRight
+    simp only [h', or_true]
+  have c : (TRI_nd A B C ABC_nd).is_cclock = C LiesOnLeft (SEG_nd A B) := by
+    apply iscclock_iff_liesonleft₃
+  have H: ¬ (TRI_nd A B C ABC_nd).is_cclock := by
+    simp only [c]
+    unfold IsOnLeftSide
+    unfold IsOnRightSide at h''
+    simp only [not_lt]
+    linarith
+  have : (TRI_nd A B C ABC_nd).angle₃.value.IsNeg = ¬ (TRI_nd A B C ABC_nd).is_cclock := by
+    symm
+    simp only [eq_iff_iff]
+    exact angle₃_neg_iff_not_cclock (TRI_nd A B C ABC_nd)
+  simp only [←this] at H
+  exact H
 
 end cclock_and_odist
 

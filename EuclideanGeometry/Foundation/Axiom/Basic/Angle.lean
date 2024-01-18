@@ -1,5 +1,5 @@
 import EuclideanGeometry.Foundation.Axiom.Basic.Angle.AddToMathlib
-
+import Mathlib.Data.Int.Parity
 /-!
 # Angle Conversions
 
@@ -15,6 +15,8 @@ In this file, we define suitable coversion function between `ℝ⧸2π`,`ℝ⧸�
 -/
 
 noncomputable section
+
+attribute [ext] Complex.ext
 
 namespace EuclidGeom
 
@@ -416,11 +418,15 @@ theorem isND_iff : θ.IsND ↔ θ ≠ 0 ∧ θ ≠ π :=
 theorem not_isND_iff : ¬ θ.IsND ↔ (θ = 0 ∨ θ = π) :=
   (not_iff_not.mpr θ.isND_iff).trans or_iff_not_and_not.symm
 
-theorem isND_iff_two_nsmul_ne_zero : θ.IsND ↔ 2 • θ ≠ 0 :=
-  (θ.isND_iff).trans (θ.two_nsmul_ne_zero_iff).symm
+theorem two_nsmul_ne_zero_iff_isND : 2 • θ ≠ 0 ↔ θ.IsND :=
+  (θ.two_nsmul_ne_zero_iff).trans (θ.isND_iff).symm
 
-theorem not_isND_iff_two_nsmul_eq_zero : ¬ θ.IsND ↔ 2 • θ = 0 :=
-  (θ.not_isND_iff).trans (θ.two_nsmul_eq_zero_iff).symm
+theorem two_nsmul_eq_zero_iff_not_isND : 2 • θ = 0 ↔ ¬ θ.IsND :=
+  (θ.two_nsmul_eq_zero_iff).trans (θ.not_isND_iff).symm
+
+theorem ne_neg_self_iff_isND : θ ≠ - θ ↔ θ.IsND := sorry
+
+theorem eq_neg_self_iff_not_isND : θ = - θ ↔ ¬ θ.IsND := sorry
 
 theorem not_isND_iff_coe : ¬ θ.IsND ↔ θ = (0 : AngDValue) :=
   not_isND_iff.trans (θ.coe_eq_zero_iff).symm
@@ -863,7 +869,7 @@ section cos
 theorem isAcu_iff_zero_lt_cos : θ.IsAcu ↔ 0 < cos θ :=
   (θ.isAcu_iff).trans (θ.zero_lt_cos_iff).symm
 
-theorem isObt_iff_zero_lt_cos : θ.IsObt ↔ cos θ < 0 :=
+theorem isObt_iff_cos_lt_zero : θ.IsObt ↔ cos θ < 0 :=
   (θ.isObt_iff).trans (θ.cos_lt_zero_iff).symm
 
 theorem isRight_iff_cos_eq_zero : θ.IsRight ↔ cos θ = 0 :=
@@ -896,7 +902,7 @@ theorem not_isRight_of_eq_zero (h : θ = 0) : ¬ θ.IsRight := by
   exact zero_not_isRight
 
 theorem pi_isObt : ∠[π].IsObt := by
-  simp only [isObt_iff_zero_lt_cos, cos_coe, cos_pi, Left.neg_neg_iff, zero_lt_one]
+  simp only [isObt_iff_cos_lt_zero, cos_coe, cos_pi, Left.neg_neg_iff, zero_lt_one]
 
 theorem pi_not_isAcu : ¬ ∠[π].IsAcu := not_isAcu_of_isObt pi_isObt
 
@@ -924,7 +930,7 @@ theorem neg_isAcu_iff_isAcu : (- θ).IsAcu ↔ θ.IsAcu := by
 
 @[simp]
 theorem neg_isObt_iff_isObt : (- θ).IsObt ↔ θ.IsObt := by
-  simp only [isObt_iff_zero_lt_cos, cos_neg]
+  simp only [isObt_iff_cos_lt_zero, cos_neg]
 
 @[simp]
 theorem neg_isRight_iff_isRight : (- θ).IsRight ↔ θ.IsRight := by
@@ -936,11 +942,11 @@ section add_pi
 
 @[simp]
 theorem add_pi_isAcu_iff_isObt : (θ + π).IsAcu ↔ θ.IsObt := by
-  rw [isAcu_iff_zero_lt_cos, cos_add_pi, Left.neg_pos_iff, isObt_iff_zero_lt_cos]
+  rw [isAcu_iff_zero_lt_cos, cos_add_pi, Left.neg_pos_iff, isObt_iff_cos_lt_zero]
 
 @[simp]
 theorem add_pi_isObt_iff_isAcu : (θ + π).IsObt ↔ θ.IsAcu := by
-  rw [isAcu_iff_zero_lt_cos, isObt_iff_zero_lt_cos, cos_add_pi, Left.neg_neg_iff]
+  rw [isAcu_iff_zero_lt_cos, isObt_iff_cos_lt_zero, cos_add_pi, Left.neg_neg_iff]
 
 @[simp]
 theorem add_pi_isRight_iff_isRight : (θ + π).IsRight ↔ θ.IsRight := by
@@ -970,11 +976,11 @@ section pi_sub
 
 @[simp]
 theorem pi_sub_isAcu_iff_isObt : (π - θ).IsAcu ↔ θ.IsObt := by
-  rw [isAcu_iff_zero_lt_cos, cos_pi_sub, Left.neg_pos_iff, isObt_iff_zero_lt_cos]
+  rw [isAcu_iff_zero_lt_cos, cos_pi_sub, Left.neg_pos_iff, isObt_iff_cos_lt_zero]
 
 @[simp]
 theorem pi_sub_isObt_iff_isAcu : (π - θ).IsObt ↔ θ.IsAcu := by
-  rw [isAcu_iff_zero_lt_cos, isObt_iff_zero_lt_cos, cos_pi_sub, Left.neg_neg_iff]
+  rw [isAcu_iff_zero_lt_cos, isObt_iff_cos_lt_zero, cos_pi_sub, Left.neg_neg_iff]
 
 @[simp]
 theorem pi_sub_isRight_iff_isRight : (π - θ).IsRight ↔ θ.IsRight := by
@@ -994,7 +1000,7 @@ theorem add_pi_div_two_isPos_iff_isAcu : (θ + ∠[π / 2]).IsPos ↔ θ.IsAcu :
   rw [isPos_iff_zero_lt_sin, isAcu_iff_zero_lt_cos, sin_add_pi_div_two]
 
 theorem add_pi_div_two_isNeg_iff_isObt : (θ + ∠[π / 2]).IsNeg ↔ θ.IsObt := by
-  rw [isNeg_iff_sin_lt_zero, isObt_iff_zero_lt_cos, sin_add_pi_div_two]
+  rw [isNeg_iff_sin_lt_zero, isObt_iff_cos_lt_zero, sin_add_pi_div_two]
 
 theorem add_pi_div_two_not_isND_iff_isRight : ¬ (θ + ∠[π / 2]).IsND ↔ θ.IsRight := by
   rw [not_isND_iff_sin_eq_zero, isRight_iff_cos_eq_zero, sin_add_pi_div_two]
@@ -1006,7 +1012,7 @@ theorem add_pi_div_two_isAcu_iff_isNeg : (θ + ∠[π / 2]).IsAcu ↔ θ.IsNeg :
   rw [isNeg_iff_sin_lt_zero, isAcu_iff_zero_lt_cos, cos_add_pi_div_two, Left.neg_pos_iff]
 
 theorem add_pi_div_two_isObt_iff_isPos : (θ + ∠[π / 2]).IsObt ↔ θ.IsPos := by
-  rw [isPos_iff_zero_lt_sin, isObt_iff_zero_lt_cos, cos_add_pi_div_two, Left.neg_neg_iff]
+  rw [isPos_iff_zero_lt_sin, isObt_iff_cos_lt_zero, cos_add_pi_div_two, Left.neg_neg_iff]
 
 theorem add_pi_div_two_isRight_iff_not_isND : (θ + ∠[π / 2]).IsRight ↔ ¬ θ.IsND := by
   rw [not_isND_iff_sin_eq_zero, isRight_iff_cos_eq_zero, cos_add_pi_div_two, neg_eq_zero]
@@ -1015,7 +1021,7 @@ theorem add_pi_div_two_not_isRight_iff_isND : ¬ (θ + ∠[π / 2]).IsRight ↔ 
   rw [isND_iff_sin_ne_zero, isRight_iff_cos_eq_zero, cos_add_pi_div_two, neg_eq_zero]
 
 theorem sub_pi_div_two_isPos_iff_isObt : (θ - ∠[π / 2]).IsPos ↔ θ.IsObt := by
-  rw [isPos_iff_zero_lt_sin, isObt_iff_zero_lt_cos, sin_sub_pi_div_two, Left.neg_pos_iff]
+  rw [isPos_iff_zero_lt_sin, isObt_iff_cos_lt_zero, sin_sub_pi_div_two, Left.neg_pos_iff]
 
 theorem sub_pi_div_two_isNeg_iff_isAcu : (θ - ∠[π / 2]).IsNeg ↔ θ.IsAcu := by
   rw [isNeg_iff_sin_lt_zero, isAcu_iff_zero_lt_cos, sin_sub_pi_div_two, Left.neg_neg_iff]
@@ -1030,7 +1036,7 @@ theorem sub_pi_div_two_isAcu_iff_isPos : (θ - ∠[π / 2]).IsAcu ↔ θ.IsPos :
   rw [isPos_iff_zero_lt_sin, isAcu_iff_zero_lt_cos, cos_sub_pi_div_two]
 
 theorem sub_pi_div_two_isObt_iff_isNeg : (θ - ∠[π / 2]).IsObt ↔ θ.IsNeg := by
-  rw [isNeg_iff_sin_lt_zero, isObt_iff_zero_lt_cos, cos_sub_pi_div_two]
+  rw [isNeg_iff_sin_lt_zero, isObt_iff_cos_lt_zero, cos_sub_pi_div_two]
 
 theorem sub_pi_div_two_isRight_iff_not_isND : (θ - ∠[π / 2]).IsRight ↔ ¬ θ.IsND := by
   rw [not_isND_iff_sin_eq_zero, isRight_iff_cos_eq_zero, cos_sub_pi_div_two]
@@ -1042,7 +1048,7 @@ theorem pi_div_two_sub_isPos_iff_isAcu : (∠[π / 2] - θ).IsPos ↔ θ.IsAcu :
   rw [isPos_iff_zero_lt_sin, isAcu_iff_zero_lt_cos, sin_pi_div_two_sub]
 
 theorem pi_div_two_sub_isNeg_iff_isAcu : (∠[π / 2] - θ).IsNeg ↔ θ.IsObt := by
-  rw [isNeg_iff_sin_lt_zero, isObt_iff_zero_lt_cos, sin_pi_div_two_sub]
+  rw [isNeg_iff_sin_lt_zero, isObt_iff_cos_lt_zero, sin_pi_div_two_sub]
 
 theorem pi_div_two_sub_not_isND_iff_isRight : ¬ (∠[π / 2] - θ).IsND ↔ θ.IsRight := by
   rw [not_isND_iff_sin_eq_zero, isRight_iff_cos_eq_zero, sin_pi_div_two_sub]
@@ -1054,7 +1060,7 @@ theorem pi_div_two_sub_isAcu_iff_isPos : (∠[π / 2] - θ).IsAcu ↔ θ.IsPos :
   rw [isPos_iff_zero_lt_sin, isAcu_iff_zero_lt_cos, cos_pi_div_two_sub]
 
 theorem pi_div_two_sub_isObt_iff_isNeg : (∠[π / 2] - θ).IsObt ↔ θ.IsNeg := by
-  rw [isNeg_iff_sin_lt_zero, isObt_iff_zero_lt_cos, cos_pi_div_two_sub]
+  rw [isNeg_iff_sin_lt_zero, isObt_iff_cos_lt_zero, cos_pi_div_two_sub]
 
 theorem pi_div_two_sub_isRight_iff_not_isND : (∠[π / 2] - θ).IsRight ↔ ¬ θ.IsND := by
   rw [not_isND_iff_sin_eq_zero, isRight_iff_cos_eq_zero, cos_pi_div_two_sub]

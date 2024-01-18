@@ -3,11 +3,13 @@ import EuclideanGeometry.Foundation.Axiom.Position.Angle_ex2
 import EuclideanGeometry.Foundation.Axiom.Position.Orientation_trash
 import EuclideanGeometry.Foundation.Axiom.Triangle.IsocelesTriangle_trash
 import EuclideanGeometry.Foundation.Axiom.Basic.Angle_trash
+import EuclideanGeometry.Foundation.Axiom.Triangle.Basic
+import EuclideanGeometry.Foundation.Axiom.Triangle.Basic_ex
 
 noncomputable section
 namespace EuclidGeom
 
-open AngValue
+open AngValue Angle
 
 @[ext]
 structure Arc (P : Type _) [EuclideanPlane P] where
@@ -89,8 +91,8 @@ def complement (β : Arc P) : Arc P where
 lemma liesint_arc_not_lieson_dlin {β : Arc P} {p : P} (h : p LiesInt β) : ¬ (p LiesOn (DLIN β.source β.target)) := by
   intro hl
   have hl : p LiesOn (LIN β.source β.target) := hl
-  have hco : colinear β.source β.target p := Line.pt_pt_linear hl
-  have hco' : ¬ (colinear β.source β.target p) := Circle.three_pts_lieson_circle_not_colinear (hne₂ := ⟨h.2.2⟩) (hne₃ := ⟨h.2.1.symm⟩) β.ison.1 β.ison.2 h.1.1
+  have hco : collinear β.source β.target p := Line.pt_pt_linear hl
+  have hco' : ¬ (collinear β.source β.target p) := Circle.three_pts_lieson_circle_not_collinear (hne₂ := ⟨h.2.2⟩) (hne₃ := ⟨h.2.1.symm⟩) β.ison.1 β.ison.2 h.1.1
   tauto
 
 theorem liesint_arc_liesonright_dlin {β : Arc P} {p : P} (h : p LiesInt β) : p LiesOnRight (DLIN β.source β.target) := by
@@ -130,19 +132,16 @@ theorem cangle_of_complementary_arc_are_opposite (β : Arc P) : β.cangle.value 
   show (∠ β.source β.circle.center β.target = -∠ β.target β.circle.center β.source)
   apply neg_value_of_rev_ang
 
-theorem antipode_iff_colinear (A B : P) {ω : Circle P} [h : PtNe B A] (h₁ : A LiesOn ω) (h₂ : B LiesOn ω) : Arc.IsAntipode A B h₁ h₂ ↔ colinear ω.center A B := by
-  constructor
-  · intro hh
-    unfold Arc.IsAntipode Arc.cangle Arc.mk_pt_pt_circle Arc.angle_mk_pt_arc at hh
-    simp at hh
-    apply colinear_of_angle_eq_pi hh
-  intro hh
+theorem antipode_iff_collinear (A B : P) {ω : Circle P} [h : PtNe B A] (h₁ : A LiesOn ω) (h₂ : B LiesOn ω) : Arc.IsAntipode A B h₁ h₂ ↔ collinear ω.center A B := by
   haveI : PtNe A ω.center := Circle.pt_lieson_ne_center h₁
   haveI : PtNe B ω.center := Circle.pt_lieson_ne_center h₂
+  constructor
+  · exact collinear_of_angle_eq_pi
+  intro hh
   show ∠ A ω.center B = π
   have hl : B LiesOn LIN ω.center A := Line.pt_pt_maximal hh
   have heq₁ : VEC A ω.center = VEC ω.center B := by
-    apply distinct_pts_same_dist_vec_eq hl
+    apply vec_eq_dist_eq_of_lies_on_line_pt_pt_of_ptNe hl
     rw [h₁, h₂]
   have heq₂ : VEC A B = (2 : ℝ) • (VEC A ω.center) := by
     calc
@@ -158,16 +157,16 @@ theorem antipode_iff_colinear (A B : P) {ω : Circle P} [h : PtNe B A] (h₁ : A
     show VEC A ω.center = 2⁻¹ • (VEC A B)
     rw [heq₂]
     simp
-  apply liesint_segnd_value_eq_pi _ hli
+  exact value_eq_pi_of_lies_int_seg_nd hli
 
 theorem mk_pt_pt_diam_isantipode {A B : P} [h : PtNe A B] : Arc.IsAntipode A B (Circle.mk_pt_pt_diam_fst_lieson) (Circle.mk_pt_pt_diam_snd_lieson) := by
-  have hc : colinear (SEG A B).midpoint A B := by
-    apply perm_colinear_trd_fst_snd
+  have hc : collinear (SEG A B).midpoint A B := by
+    apply perm_collinear_trd_fst_snd
     apply Line.pt_pt_linear
     show (SEG A B).midpoint LiesOn (SEG_nd A B).toLine
     apply SegND.lies_on_toLine_of_lie_on
     apply Seg.midpt_lies_on
-  exact (antipode_iff_colinear _ _ (Circle.mk_pt_pt_diam_fst_lieson) (Circle.mk_pt_pt_diam_snd_lieson)).mpr hc
+  exact (antipode_iff_collinear _ _ (Circle.mk_pt_pt_diam_fst_lieson) (Circle.mk_pt_pt_diam_snd_lieson)).mpr hc
 
 end Arc
 
@@ -176,11 +175,13 @@ end angle
 
 theorem inscribed_angle_is_positive {p : P} {β : Arc P} (h : p LiesInt β.complement) : (Arc.angle_mk_pt_arc p β h.2.symm).value.IsPos := by
   unfold Arc.angle_mk_pt_arc
-  apply liesonleft_angle_ispos (Arc.liesint_complementary_arc_liesonleft_dlin h)
+  apply TriangleND.liesonleft_angle_ispos
+  exact (Arc.liesint_complementary_arc_liesonleft_dlin h)
 
 theorem inscribed_angle_of_complementary_arc_is_negative {p : P} {β : Arc P} (h : p LiesInt β) : (Arc.angle_mk_pt_arc p β h.2).value.IsNeg := by
   unfold Arc.angle_mk_pt_arc
-  apply liesonright_angle_isneg (Arc.liesint_arc_liesonright_dlin h)
+  apply TriangleND.liesonright_angle_isneg
+  exact (Arc.liesint_arc_liesonright_dlin h)
 
 theorem cangle_eq_two_times_inscribed_angle {p : P} {β : Arc P} (h₁ : p LiesOn β.circle) (h₂ : Arc.Isnot_arc_endpts p β) : β.cangle.value = 2 • (Arc.angle_mk_pt_arc p β h₂).value := by
   haveI : PtNe p β.source := ⟨h₂.1⟩

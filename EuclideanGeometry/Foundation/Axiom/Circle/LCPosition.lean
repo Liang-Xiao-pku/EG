@@ -69,7 +69,7 @@ lemma dist_pt_line_ineq {l : DirLine P} {ω : Circle P} (h : DirLine.IsIntersect
     rw [abs_of_nonneg, abs_of_pos]
     exact this
     exact ω.rad_pos
-    exact length_nonneg
+    exact Seg.length_nonneg
   linarith
 
 def Inxpts {l : DirLine P} {ω : Circle P} (_h : DirLine.IsIntersected l ω) : DirLCInxpts P where
@@ -165,8 +165,7 @@ theorem inx_pts_same_iff_tangent {l : DirLine P} {ω : Circle P} (h : DirLine.Is
         apply dist_pt_line_ineq h
       apply (sq_eq_sq _ _).mp
       linarith
-      unfold dist_pt_line
-      exact length_nonneg
+      exact Seg.length_nonneg
       apply le_iff_lt_or_eq.mpr
       left; exact ω.rad_pos
     exfalso
@@ -277,8 +276,8 @@ theorem DirLC_intersection_eq_inxpts {l : DirLine P} {ω : Circle P} {A : P} (h 
     have : dist_pt_line ω.center l = ω.radius := h''
     have : dist_pt_line ω.center l < ω.radius := h'
     linarith⟩
-  have hc : colinear A (Inxpts h).front (Inxpts h).back := Line.linear h₁ (inx_pts_lieson_dlin h).1 (inx_pts_lieson_dlin h).2
-  have hnc : ¬ (colinear A (Inxpts h).front (Inxpts h).back) := three_pts_lieson_circle_not_colinear h₃ (inx_pts_lieson_circle h).1 (inx_pts_lieson_circle h).2
+  have hc : collinear A (Inxpts h).front (Inxpts h).back := Line.linear h₁ (inx_pts_lieson_dlin h).1 (inx_pts_lieson_dlin h).2
+  have hnc : ¬ (collinear A (Inxpts h).front (Inxpts h).back) := three_pts_lieson_circle_not_collinear h₃ (inx_pts_lieson_circle h).1 (inx_pts_lieson_circle h).2
   tauto
 
 theorem pt_pt_tangent_eq_tangent_pt {A B : P} {ω : Circle P} (h₁ : A LiesOut ω) (h₂ : B LiesOn ω) (ht : (DLIN A B (pt_liesout_ne_pt_lieson h₁ h₂).out.symm) Tangent ω) : B = Tangentpt ht := by

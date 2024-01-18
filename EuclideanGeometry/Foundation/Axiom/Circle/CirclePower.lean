@@ -8,7 +8,7 @@ namespace EuclidGeom
 
 variable {P : Type _} [EuclideanPlane P]
 
-open DirLC
+open DirLC CC Angle
 
 namespace Circle
 
@@ -74,11 +74,11 @@ lemma tangent_circle_intersected {ω : Circle P} {p : P} (h : p LiesOut ω) : Ci
   simp; exact ω.rad_pos
 
 def pt_tangent_circle_pts {ω : Circle P} {p : P} (h : p LiesOut ω) : Tangents P where
-  left := (CC_Intersected_pts (tangent_circle_intersected h)).left
-  right := (CC_Intersected_pts (tangent_circle_intersected h)).right
+  left := (Inxpts (tangent_circle_intersected h)).left
+  right := (Inxpts (tangent_circle_intersected h)).right
 
 theorem tangents_lieson_circle {ω : Circle P} {p : P} (h : p LiesOut ω) : ((pt_tangent_circle_pts h).left LiesOn ω) ∧ ((pt_tangent_circle_pts h).right LiesOn ω) := by
-  rcases CC_inx_pts_lieson_circles (tangent_circle_intersected h) with ⟨_, ⟨h₂, ⟨_, h₄⟩⟩⟩
+  rcases inx_pts_lieson_circles (tangent_circle_intersected h) with ⟨_, ⟨h₂, ⟨_, h₄⟩⟩⟩
   exact ⟨h₂, h₄⟩
 
 lemma tangents_ne_pt {ω : Circle P} {p : P} (h : p LiesOut ω) : ((pt_tangent_circle_pts h).left ≠ p) ∧ ((pt_tangent_circle_pts h).right ≠ p) := by
@@ -117,13 +117,13 @@ lemma tangents_perp₁ {ω : Circle P} {p : P} (h : p LiesOut ω) : (DLIN p (pt_
   haveI : PtNe (pt_tangent_circle_pts h).left p := ⟨(tangents_ne_pt h).1⟩
   have heq₁ : ∠ p (pt_tangent_circle_pts h).left ω.center = ∡[π / 2] := by
     apply inscribed_angle_of_diameter_eq_mod_pi_pt_pt_pt
-    · exact (CC_inx_pts_lieson_circles (tangent_circle_intersected h)).1
+    · exact (inx_pts_lieson_circles (tangent_circle_intersected h)).1
     exact Arc.mk_pt_pt_diam_isantipode
   show (DLIN p (pt_tangent_circle_pts h).left).toProj = (DLIN ω.center (pt_tangent_circle_pts h).left).toProj.perp
   calc
     _ = (RAY p (pt_tangent_circle_pts h).left).toProj := rfl
     _ = (RAY (pt_tangent_circle_pts h).left p).toProj := by apply Ray.toProj_eq_toProj_of_mk_pt_pt
-    _ = (RAY (pt_tangent_circle_pts h).left ω.center).toProj.perp := dvalue_eq_ang_rays_perp heq₁
+    _ = (RAY (pt_tangent_circle_pts h).left ω.center).toProj.perp := dir_perp_iff_dvalue_eq_pi_div_two.mpr heq₁
     _ = (RAY ω.center (pt_tangent_circle_pts h).left).toProj.perp := by rw [Ray.toProj_eq_toProj_of_mk_pt_pt]
     _ = (DLIN ω.center (pt_tangent_circle_pts h).left).toProj.perp := rfl
 
@@ -133,13 +133,13 @@ lemma tangents_perp₂ {ω : Circle P} {p : P} (h : p LiesOut ω) : (DLIN p (pt_
   haveI : PtNe ω.center (pt_tangent_circle_pts h).right := ⟨(tangents_ne_center h).2.symm⟩
   have heq₂ : ∠ p (pt_tangent_circle_pts h).right ω.center = ∡[π / 2] := by
     apply inscribed_angle_of_diameter_eq_mod_pi_pt_pt_pt
-    · exact (CC_inx_pts_lieson_circles (tangent_circle_intersected h)).2.2.1
+    · exact (inx_pts_lieson_circles (tangent_circle_intersected h)).2.2.1
     apply Arc.mk_pt_pt_diam_isantipode
   show (DLIN p (pt_tangent_circle_pts h).right).toProj = (DLIN ω.center (pt_tangent_circle_pts h).right).toProj.perp
   calc
     _ = (RAY p (pt_tangent_circle_pts h).right).toProj := rfl
     _ = (RAY (pt_tangent_circle_pts h).right p).toProj := by apply Ray.toProj_eq_toProj_of_mk_pt_pt
-    _ = (RAY (pt_tangent_circle_pts h).right ω.center).toProj.perp := dvalue_eq_ang_rays_perp heq₂
+    _ = (RAY (pt_tangent_circle_pts h).right ω.center).toProj.perp := dir_perp_iff_dvalue_eq_pi_div_two.mpr heq₂
     _ = (RAY ω.center (pt_tangent_circle_pts h).right).toProj.perp := by rw [Ray.toProj_eq_toProj_of_mk_pt_pt]
     _ = (DLIN ω.center (pt_tangent_circle_pts h).right).toProj.perp := rfl
 
@@ -222,8 +222,7 @@ theorem liesout_back_lieson_ray_front {ω : Circle P} {p : P} {l : DirLine P} (h
         rw [abs_of_nonneg dist_nonneg, abs_of_nonneg dist_nonneg, (inx_pts_lieson_circle h₁).1]
         exact h₃
       _ = dist (Inxpts h₁).front (SEG (Inxpts h₁).front (Inxpts h₁).back).midpoint := by rw [abs_of_nonneg dist_nonneg]
-  apply (not_lies_on_segnd_iff_lieson_ray h₂').mp
-  apply (midpoint_dist_gt_iff_liesout h₂').mp hgt
+  exact (not_lies_on_seg_nd_iff_lies_on_ray h₂').mp <| ((SEG_nd (DirLC.Inxpts h₁).front (DirLC.Inxpts h₁).back).dist_midpt_gt_iff_not_lies_on_of_lies_on_toLine h₂').mp hgt
 
 theorem liesint_back_lieson_ray_front_reverse {ω : Circle P} {p : P} {l : DirLine P} (h₁ : DirLine.IsIntersected l ω) (h₂ : p LiesOn l) (h₃ : p LiesInt ω) : (Inxpts h₁).back LiesOn (RAY p (Inxpts h₁).front (liesint_ne_inxpts h₁ h₂ h₃).1.symm).reverse := by
   haveI : PtNe p (Inxpts h₁).front := ⟨(liesint_ne_inxpts h₁ h₂ h₃).1⟩
@@ -257,8 +256,8 @@ theorem liesint_back_lieson_ray_front_reverse {ω : Circle P} {p : P} {l : DirLi
         rw [abs_of_nonneg dist_nonneg, abs_of_nonneg dist_nonneg, (inx_pts_lieson_circle h₁).1]
         exact h₃
       _ = dist (Inxpts h₁).front (SEG (Inxpts h₁).front (Inxpts h₁).back).midpoint := by rw [abs_of_nonneg dist_nonneg]
-  apply (liesint_segnd_iff_lieson_ray_reverse h₂').mp
-  apply (midpoint_dist_lt_iff_liesint h₂').mp hgt
+  apply (lies_int_seg_nd_iff_lies_on_ray_reverse h₂').mp
+  exact ((SEG_nd (Inxpts h₁).front (Inxpts h₁).back).dist_midpt_lt_iff_lies_int_of_lies_on_toLine h₂').mp hgt
 
 end Circle
 

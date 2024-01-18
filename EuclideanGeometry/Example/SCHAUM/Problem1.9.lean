@@ -9,6 +9,8 @@ namespace Schaum
 
 namespace Problem1_9
 
+open Angle
+
 /-
 Let $\triangle ABC$ be an isoceles triangle in which $AB = AC$. Let $E$ be a point on the extension of $BA$.Let X be a point on the ray through $A$ with the same direction to $\vec{BC}$.
 
@@ -20,12 +22,12 @@ structure Setting1 (Plane : Type _) [EuclideanPlane Plane] where
   A : Plane
   B : Plane
   C : Plane
-  not_colinear_ABC : ¬ colinear A B C
+  not_collinear_ABC : ¬ collinear A B C
   isoceles_ABC : (▵ A B C).IsIsoceles
 -- Claim $B \ne A$.
   B_ne_A : B ≠ A :=
     -- This is because vertices $A, B$ of a nondegenerate triangle are distinct.
-    (ne_of_not_colinear not_colinear_ABC).2.2
+    (ne_of_not_collinear not_collinear_ABC).2.2
 -- denote the extension of $BA$ as $BA_ext$.
   BA_ext : Ray Plane
   hlba : BA_ext = (SEG_nd B A B_ne_A.symm).extension
@@ -35,11 +37,11 @@ structure Setting1 (Plane : Type _) [EuclideanPlane Plane] where
 -- Claim $C \ne B$.
   C_ne_B : C ≠ B :=
   -- This is because vertices $B, C$ of a nondegenerate triangle are distinct.
-    (ne_of_not_colinear not_colinear_ABC).1
+    (ne_of_not_collinear not_collinear_ABC).1
 -- Claim $C \ne A$.
   C_ne_A : C ≠ A :=
   -- This is because vertices $A, C$ of a nondegenerate triangle are distinct.
-    (ne_of_not_colinear not_colinear_ABC).2.1.symm
+    (ne_of_not_collinear not_collinear_ABC).2.1.symm
 -- denote segment $BC$ as $BC$.
   BC : SegND Plane
   hbc : BC = SEG_nd B C C_ne_B
@@ -113,12 +115,12 @@ Therefore, $\angle EAX = \angle ABC = - \angle ACB = \angle XAC$.
   calc
   ∠ e.E e.A e.X e.E_ne_A e.X_ne_A
   -- As $AE$ has the same direction as $BA$ and that $AX$ has the same direction as $BC$, we know that $\angle EAX = \angle ABC$,
-  _= ∠ e.A e.B e.C e.B_ne_A.symm e.C_ne_B := ang_eq_ang_of_toDir_eq_toDir dir_AE_eq_dir_BA dir_AX_eq_dir_BC
+  _= ∠ e.A e.B e.C e.B_ne_A.symm e.C_ne_B := value_eq_of_dir_eq dir_AE_eq_dir_BA dir_AX_eq_dir_BC
   -- $\angle ABC = - \angle CBA$ by symmetry,
   _= - ∠ e.C e.B e.A e.C_ne_B e.B_ne_A.symm := by exact neg_value_of_rev_ang e.B_ne_A.symm e.C_ne_B
   -- $ - \angle CBA = - \angle ACB$ because $\angle CBA = \angle ACB$ in the isoceles triangle $ABC$,
   _= - ∠ e.A e.C e.B e.C_ne_A.symm e.C_ne_B.symm := by
-    simp only [neg_inj] ; exact is_isoceles_tri_iff_ang_eq_ang_of_nd_tri (tri_nd := (TRI_nd e.A e.B e.C e.not_colinear_ABC)).mp e.isoceles_ABC
+    simp only [neg_inj] ; exact is_isoceles_tri_iff_ang_eq_ang_of_nd_tri (tri_nd := (TRI_nd e.A e.B e.C e.not_collinear_ABC)).mp e.isoceles_ABC
   -- as $AC$ has the opposite direction of $CA$ and $AX$ has the opposite direction of $CB$, we have $\angle ACB = - \angle XAC$,
   _= - ∠ e.C e.A e.X e.C_ne_A e.X_ne_A := by
     simp only [neg_inj] ; exact ang_eq_ang_of_toDir_eq_neg_toDir dir_AC_eq_neg_dir_CA dir_CB_eq_neg_dir_AX

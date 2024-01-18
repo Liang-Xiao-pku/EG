@@ -23,7 +23,7 @@ def mk_pt_pt (O A : P) [h : PtNe O A] : Circle P where
   radius := dist O A
   rad_pos := dist_pos.mpr h.out
 
-def mk_pt_pt_pt (A B C: P) (h : ¬ colinear A B C) : Circle P := sorry
+def mk_pt_pt_pt (A B C: P) (h : ¬ collinear A B C) : Circle P := sorry
 
 end Circle
 
@@ -128,16 +128,13 @@ theorem interior_of_circle_iff_inside_not_on_circle (p : P) (ω : Circle P) : p 
   push_neg
   exact lt_iff_le_and_ne
 
-@[simp]
 theorem mk_pt_pt_lieson {O A : P} [PtNe O A] : A LiesOn (CIR O A) := rfl
 
-@[simp]
 theorem mk_pt_pt_diam_fst_lieson {A B : P} [_h : PtNe A B] : A LiesOn (mk_pt_pt_diam A B) := by
   show dist (SEG A B).midpoint A = dist (SEG A B).midpoint B
   rw [dist_comm, ← Seg.length_eq_dist, ← Seg.length_eq_dist]
-  exact dist_target_eq_dist_source_of_midpt (seg := (SEG A B))
+  exact (SEG A B).dist_target_eq_dist_source_of_midpt
 
-@[simp]
 theorem mk_pt_pt_diam_snd_lieson {A B : P} [_h : PtNe A B] : B LiesOn (mk_pt_pt_diam A B) := rfl
 
 -- Define a concept of segment to be entirely contained in a circle, to mean that the two endpoints of a segment to lie inside a circle.
@@ -159,7 +156,7 @@ end Circle
 end position
 
 
-section colinear
+section collinear
 
 namespace Circle
 
@@ -183,10 +180,10 @@ lemma pts_lieson_circle_vec_eq {A B : P} {ω : Circle P} [hne : PtNe B A] (hl₁
         _ > ω.radius ^ 2 := by
           simp
     linarith⟩
-  apply distinct_pts_same_dist_vec_eq
+  apply vec_eq_dist_eq_of_lies_on_line_pt_pt_of_ptNe
   · have : (perp_foot ω.center (LIN A B)) LiesOn (LIN A B) := perp_foot_lies_on_line _ _
-    have : colinear A B (perp_foot ω.center (LIN A B)) := Line.pt_pt_linear this
-    have : colinear (perp_foot ω.center (LIN A B)) A B := perm_colinear_trd_fst_snd this
+    have : collinear A B (perp_foot ω.center (LIN A B)) := Line.pt_pt_linear this
+    have : collinear (perp_foot ω.center (LIN A B)) A B := perm_collinear_trd_fst_snd this
     apply Line.pt_pt_maximal this
   apply (sq_eq_sq dist_nonneg dist_nonneg).mp
   calc
@@ -209,7 +206,7 @@ theorem pts_lieson_circle_perpfoot_eq_midpoint {A B : P} {ω : Circle P} [hne : 
     _ = VEC A (perp_foot ω.center (LIN A B)) - VEC A (SEG A B).midpoint := by rw [vec_sub_vec]
     _ = 0 := by rw [eq₁, eq₂]; simp
 
-theorem three_pts_lieson_circle_not_colinear {A B C : P} {ω : Circle P} [hne₁ : PtNe B A] [hne₂ : PtNe C B] [hne₃ : PtNe A C] (hl₁ : A LiesOn ω) (hl₂ : B LiesOn ω) (hl₃ : C LiesOn ω) : ¬ (colinear A B C) := by
+theorem three_pts_lieson_circle_not_collinear {A B C : P} {ω : Circle P} [hne₁ : PtNe B A] [hne₂ : PtNe C B] [hne₃ : PtNe A C] (hl₁ : A LiesOn ω) (hl₂ : B LiesOn ω) (hl₃ : C LiesOn ω) : ¬ (collinear A B C) := by
   intro h
   have eq₁ : VEC A (perp_foot ω.center (LIN A B)) = VEC (perp_foot ω.center (LIN A B)) B := pts_lieson_circle_vec_eq hl₁ hl₂
   have eq₂ : VEC A (perp_foot ω.center (LIN A C)) = VEC (perp_foot ω.center (LIN A C)) C := pts_lieson_circle_vec_eq hl₁ hl₃
@@ -226,7 +223,7 @@ theorem three_pts_lieson_circle_not_colinear {A B C : P} {ω : Circle P} [hne₁
 
 end Circle
 
-end colinear
+end collinear
 
 section antipode
 
@@ -234,11 +231,10 @@ namespace Circle
 
 def antipode (A : P) (ω : Circle P) : P := VEC A ω.center +ᵥ ω.center
 
-@[simp]
 theorem antipode_lieson_circle {A : P} {ω : Circle P} {ha : A LiesOn ω} : (antipode A ω) LiesOn ω := by
   show dist ω.center (antipode A ω) = ω.radius
   rw [NormedAddTorsor.dist_eq_norm', antipode,  vsub_vadd_eq_vsub_sub]
-  simp
+  simp only [vsub_self, zero_sub, norm_neg]
   show ‖ω.center -ᵥ A‖ = ω.radius
   rw [← NormedAddTorsor.dist_eq_norm', ha]
 
@@ -252,7 +248,6 @@ theorem antipode_symm {A B : P} {ω : Circle P} {ha : A LiesOn ω} (h : antipode
     apply (eq_vadd_iff_vsub_eq _ _ _).mp h.symm
   rw [← neg_vec, ← this, neg_vec]
 
-@[simp]
 theorem antipode_distinct {A : P} {ω : Circle P} {ha : A LiesOn ω} : antipode A ω ≠ A := by
   intro eq
   have : VEC ω.center A = VEC A ω.center := by

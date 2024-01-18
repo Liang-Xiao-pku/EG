@@ -16,8 +16,8 @@ theorem cosine_rule' (A B C : P) [hab : PtNe B A] [hac : PtNe C A] :
     2 * (‖VEC_nd A B‖ * ‖VEC_nd A C‖ *
       cos (VecND.angle (VEC_nd A B) (VEC_nd A C))) =
       Seg.length (SEG A B) ^ 2 + Seg.length (SEG A C) ^ 2 - Seg.length (SEG B C) ^ 2 := by
-  rw [VecND.norm_mul_cos, length_sq_eq_inner_toVec_toVec,
-    length_sq_eq_inner_toVec_toVec, length_sq_eq_inner_toVec_toVec, seg_toVec_eq_vec,
+  rw [VecND.norm_mul_cos, Seg.length_sq_eq_inner_toVec_toVec,
+    Seg.length_sq_eq_inner_toVec_toVec, Seg.length_sq_eq_inner_toVec_toVec, seg_toVec_eq_vec,
     seg_toVec_eq_vec, seg_toVec_eq_vec, ← vec_sub_vec A B C, inner_sub_sub_self,
     ← InnerProductSpace.conj_symm, IsROrC.conj_to_real]
   ring_nf
@@ -31,7 +31,7 @@ theorem cosine_rule (tr_nd : TriangleND P) : 2 * (tr_nd.edge₃.length * tr_nd.e
   let h₃ := @cosine_rule' _ _ A B C tr_nd.nontriv₃ tr_nd.nontriv₂.symm
   have h₄ : ‖VEC_nd A C tr_nd.nontriv₂.out.symm‖ = ‖VEC_nd C A tr_nd.nontriv₂.out‖
   · simp_rw [VecND.mkPtPt, ← neg_vec A C]
-    simp
+    simp only [ne_eq, VecND.mk_neg', VecND.norm_neg]
   have h₅ : Seg.length (SEG A C) = Seg.length (SEG C A)
   · rw [Seg.length_eq_norm_toVec, Seg.length_eq_norm_toVec]
     -- unfold Seg.length Seg.toVec
@@ -70,11 +70,11 @@ theorem Pythagoras_of_perp_foot (A B : P) {l : Line P} (h : B LiesOn l) : (SEG A
   --let C := tr_nd.1.point₃
 
 /-- Given ▵ A B C with ∠ B A C = π / 2, A B ^ 2 + A C ^ 2 = B C ^ 2, namely (SEG A B).length ^ 2 + (SEG A C).length ^ 2 = (SEG B C).length ^ 2. -/
-theorem Pythagoras_of_right_triangle_non_trivial (A B C : P) {hnd : ¬ colinear A B C} (right_triangle: ∠ B A C (ne_of_not_colinear hnd).2.2 (ne_of_not_colinear hnd).2.1.symm = (π / 2 : ℝ)) : (SEG A B).length ^ 2 + (SEG A C).length ^ 2 = (SEG B C).length ^ 2 := by
-  have h : cos (∠ B A C (ne_of_not_colinear hnd).2.2 (ne_of_not_colinear hnd).2.1.symm) = 0
+theorem Pythagoras_of_right_triangle_non_trivial (A B C : P) {hnd : ¬ collinear A B C} (right_triangle: ∠ B A C (ne_of_not_collinear hnd).2.2 (ne_of_not_collinear hnd).2.1.symm = (π / 2 : ℝ)) : (SEG A B).length ^ 2 + (SEG A C).length ^ 2 = (SEG B C).length ^ 2 := by
+  have h : cos (∠ B A C (ne_of_not_collinear hnd).2.2 (ne_of_not_collinear hnd).2.1.symm) = 0
   · rw [right_triangle]
     simp
-  have eq : 2 * ((SEG A B).length * (SEG A C).length * cos (∠ B A C (ne_of_not_colinear hnd).2.2 (ne_of_not_colinear hnd).2.1.symm)) = (SEG A B).length ^ 2 + (SEG A C).length ^ 2 - (SEG B C).length ^ 2
+  have eq : 2 * ((SEG A B).length * (SEG A C).length * cos (∠ B A C (ne_of_not_collinear hnd).2.2 (ne_of_not_collinear hnd).2.1.symm)) = (SEG A B).length ^ 2 + (SEG A C).length ^ 2 - (SEG B C).length ^ 2
   · --cos rule
     sorry
   simp [h, eq_sub_iff_add_eq] at eq

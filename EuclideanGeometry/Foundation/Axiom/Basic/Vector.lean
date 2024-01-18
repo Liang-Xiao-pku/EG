@@ -400,10 +400,7 @@ instance innerProductSpace' : InnerProductSpace ℝ Vec where
   norm_sq_eq_inner v := by simp [norm_sq]
   conj_symm v₁ v₂ := by simp [Complex.conj_ofReal, mul_comm]
   add_left v₁ v₂ v₃ := by dsimp; ring
-  smul_left v₁ v₂ z := by
-    dsimp
-    simp only [zero_mul, sub_zero, add_zero, conj_trivial]
-    ring
+  smul_left v₁ v₂ z := by dsimp; simp only [zero_mul, sub_zero, add_zero, conj_trivial]; ring
 
 lemma real_inner_apply (v₁ v₂ : Vec) :
     ⟪v₁, v₂⟫_ℝ = v₁.fst * v₂.fst + v₁.snd * v₂.snd :=
@@ -1636,6 +1633,9 @@ instance : AddTorsor AngDValue Proj where
     induction θ using AngDValue.induction_on
     induction p using Proj.ind
     simp
+
+instance instCircularOrderedAddTorsor : CircularOrderedAddTorsor AngDValue Proj :=
+  AddTorsor.CircularOrderedAddTorsor_of_CircularOrderedAddCommGroup AngDValue Proj
 
 @[pp_dot]
 def perp (p : Proj) : Proj := ∡[π / 2] +ᵥ p
